@@ -12,9 +12,9 @@ pipeline {
     stage('Copy to Apache Server') {
       steps {
         script {
-          def remoteServer = '34.205.65.197' // Replace with your server's IP address or hostname
+          def remoteServer = '34.205.65.197' // Replace with your server's IP address
           def remoteUser = 'ubuntu' // Replace with your SSH username
-          def remoteKeyPath = '~/ansible.pem' // Replace with the path to your private SSH key file
+          def remoteKeyPath = 'ّ/ansible.pem' // Replace with the path to your private SSH key file
 
           // Define the local and remote paths
           def localFilePath = 'index.html' // The file you want to copy
@@ -23,6 +23,12 @@ pipeline {
           // Use SSH with private key to copy the file to the remote server
           sshScript = """
           ssh -o StrictHostKeyChecking=no -i ${remoteKeyPath} ${remoteUser}@${remoteServer} "sudo cp ${localFilePath} ${remoteApachePath}"
+          """
+          sh(script: sshScript, returnStatus: true)
+
+          // Restart Apache service on the remote server
+          sshScript = """
+          ssh -o StrictHostKeyChecking=no -i ${remoteKeyPath} ${remoteUser}@${remoteServer} "sudo systemctl restart apache2"
           """
           sh(script: sshScript, returnStatus: true)
         }
