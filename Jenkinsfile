@@ -1,0 +1,32 @@
+pipeline {
+  agent any
+
+  stages {
+    stage('Checkout') {
+      steps {
+        // Checkout the source code from your project repository
+        checkout scm
+      }
+    }
+
+    stage('Copy to Apache Server') {
+      steps {
+        script {
+          def remoteServer = '34.205.65.197' // Replace with your server's IP address or hostname
+          def remoteUser = 'ubuntu' // Replace with your SSH username
+          def remoteKeyPath = '~/ansible.pem' // Replace with the path to your private SSH key file
+
+          // Define the local and remote paths
+          def localFilePath = 'index.html' // The file you want to copy
+          def remoteApachePath = '/var/www/html/' // Replace with your Apache web server path
+
+          // Use SSH with private key to copy the file to the remote server
+          sshScript = """
+          ssh -o StrictHostKeyChecking=no -i ${remoteKeyPath} ${remoteUser}@${remoteServer} "sudo cp ${localFilePath} ${remoteApachePath}"
+          """
+          sh(script: sshScript, returnStatus: true)
+        }
+      }
+    }
+  }
+}
